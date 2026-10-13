@@ -27,10 +27,11 @@ export function hashToken(token) {
 }
 
 function cookieBase() {
+  const crossSite = process.env.NODE_ENV === 'production';
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: crossSite,
+    sameSite: crossSite ? 'none' : 'lax',
     path: '/',
   };
 }

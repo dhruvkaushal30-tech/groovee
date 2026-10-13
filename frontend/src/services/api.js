@@ -1,9 +1,17 @@
 import axios from 'axios';
 
+const apiOrigin = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '').replace(/\/api$/, '');
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: apiOrigin ? `${apiOrigin}/api` : '/api',
   withCredentials: true,
 });
+
+export function mediaUrl(src) {
+  if (!src || /^https?:\/\//i.test(src) || src.startsWith('data:')) return src || '';
+  const path = src.startsWith('/') ? src : `/${src}`;
+  return `${apiOrigin}${path}`;
+}
 
 let refreshRequest = null;
 

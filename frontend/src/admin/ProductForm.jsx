@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../components/Loader';
-import { api, errorMessage } from '../services/api';
+import { api, errorMessage, mediaUrl } from '../services/api';
 
 const emptyVariant = { size: 'M', color: 'Black', stock: 5, sku: '' };
 
@@ -149,7 +149,7 @@ export default function ProductForm() {
         <div className="thumbs">
           {existingImages.map((src) => (
             <button type="button" key={src} onClick={() => setExistingImages((current) => current.filter((item) => item !== src))}>
-              <img src={src} alt="" />
+              <img src={mediaUrl(src)} alt="" />
             </button>
           ))}
         </div>

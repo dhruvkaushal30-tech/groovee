@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { mediaUrl } from '../services/api';
 import { formatINR } from '../utils/money';
 
 export default function ProductCard({ product }) {
@@ -9,7 +10,7 @@ export default function ProductCard({ product }) {
   return (
     <article className="product-card">
       <Link to={`/product/${product.slug}`} className="product-card-media">
-        {product.images?.[0] ? <img src={product.images[0]} alt={product.name} /> : <div className="ph" />}
+        {product.images?.[0] ? <img src={mediaUrl(product.images[0])} alt={product.name} /> : <div className="ph" />}
         {soldOut && <span className="badge">Sold out</span>}
       </Link>
       <div className="product-card-body">

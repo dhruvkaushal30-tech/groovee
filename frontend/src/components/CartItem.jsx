@@ -1,9 +1,10 @@
+import { mediaUrl } from '../services/api';
 import { formatINR } from '../utils/money';
 
 export default function CartItem({ item, onUpdate, onRemove, busy }) {
   return (
     <article className="cart-item">
-      <div className="cart-thumb">{item.image ? <img src={item.image} alt="" /> : null}</div>
+      <div className="cart-thumb">{item.image ? <img src={mediaUrl(item.image)} alt="" /> : null}</div>
       <div>
         <h3>{item.name}</h3>
         <p>

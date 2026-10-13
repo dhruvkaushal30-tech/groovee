@@ -4,7 +4,7 @@ import Loader from '../components/Loader';
 import SizeChart from '../components/SizeChart';
 import { useCart } from '../context/CartContext';
 import { chartForCategory } from '../data/sizeCharts';
-import { api, errorMessage } from '../services/api';
+import { api, errorMessage, mediaUrl } from '../services/api';
 import { formatINR } from '../utils/money';
 
 export default function ProductDetails() {
@@ -77,11 +77,11 @@ export default function ProductDetails() {
   return (
     <div className="pdp">
       <div className="gallery">
-        <img src={product.images[image]} alt={product.name} />
+        <img src={mediaUrl(product.images[image])} alt={product.name} />
         <div className="thumbs">
           {product.images.map((src, index) => (
             <button type="button" key={src} className={index === image ? 'active' : ''} onClick={() => setImage(index)}>
-              <img src={src} alt="" />
+              <img src={mediaUrl(src)} alt="" />
             </button>
           ))}
         </div>

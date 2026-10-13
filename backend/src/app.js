@@ -1,4 +1,5 @@
 import path from 'path';
+import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -6,6 +7,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { fileURLToPath } from 'url';
+import { connectDatabase } from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import productRoutes from './routes/product.routes.js';
@@ -16,9 +18,33 @@ import couponRoutes from './routes/coupon.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 
+dotenv.config();
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+app.set('trust proxy', 1);
+
+function configuredOrigins() {
+  return (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((value) => value.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+}
+
+export function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  let url;
+  try {
+    url = new URL(origin);
+  } catch {
+    return false;
+  }
+  if (configuredOrigins().includes(origin.replace(/\/$/, ''))) return true;
+  const localHost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  if (url.protocol === 'http:' && localHost) return true;
+  return url.protocol === 'https:' && url.hostname.endsWith('.vercel.app');
+}
 
 app.use(
   helmet({
@@ -27,7 +53,9 @@ app.use(
 );
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin(origin, callback) {
+      callback(null, isAllowedOrigin(origin));
+    },
     credentials: true,
   })
 );
@@ -38,6 +66,16 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
+});
+
+app.use('/api', async (req, res, next) => {
+  if (req.path === '/health') return next();
+  try {
+    await connectDatabase();
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 const authLimiter = rateLimit({

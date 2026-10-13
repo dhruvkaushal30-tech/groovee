@@ -1,11 +1,21 @@
 import mongoose from 'mongoose';
 
-export async function connectDatabase() {
+let connection;
+
+export function connectDatabase() {
   const uri = process.env.MONGO_URI;
   if (!uri) {
-    throw new Error('MONGO_URI is not set');
+    return Promise.reject(new Error('MONGO_URI is not set'));
   }
-  mongoose.set('strictQuery', true);
-  await mongoose.connect(uri);
-  console.log('MongoDB connected');
+  if (mongoose.connection.readyState === 1) return Promise.resolve();
+  if (!connection) {
+    mongoose.set('strictQuery', true);
+    connection = mongoose.connect(uri).then(() => {
+      console.log('MongoDB connected');
+    }).catch((err) => {
+      connection = null;
+      throw err;
+    });
+  }
+  return connection;
 }
