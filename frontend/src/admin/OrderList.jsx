@@ -29,7 +29,7 @@ export default function OrderList() {
     <div>
       <div className="section-head">
         <h1>Orders</h1>
-        <label>
+        <label className="order-status-filter">
           Status
           <select
             value={status}

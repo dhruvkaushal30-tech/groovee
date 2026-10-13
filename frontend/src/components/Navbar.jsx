@@ -47,10 +47,12 @@ export default function Navbar() {
             </NavLink>
           ))}
         </nav>
-        <p className="nav-brand" aria-label="CONCEPT Groove">
-          <span>CONCEPT</span>
-          <span className="nav-brand-name">Groove</span>
-        </p>
+        <Link to="/" className="nav-brand" aria-label="CONCEPT Groove" onClick={close}>
+          <span className="nav-brand-mark">
+            <span>CONCEPT</span>
+            <span className="nav-brand-name">Groove</span>
+          </span>
+        </Link>
         <div className="nav-actions">
           <button className="icon-btn search-btn" type="button" aria-label="Search" onClick={() => setSearchOpen((value) => !value)}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
