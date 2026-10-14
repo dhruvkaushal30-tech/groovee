@@ -3,6 +3,7 @@ import { Category } from '../models/Category.js';
 import { Product } from '../models/Product.js';
 import { AppError } from '../utils/AppError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { persistUploads } from '../middleware/upload.middleware.js';
 import { sellingPrice } from '../utils/pricing.js';
 import { slugify } from '../utils/slug.js';
 
@@ -19,7 +20,7 @@ function parseList(value) {
   return text.split(',').map((item) => item.trim()).filter(Boolean);
 }
 
-export function buildProductData(body, files = [], existingImages = []) {
+export function buildProductData(body, uploaded = [], existingImages = []) {
   const variants = parseList(body.variants).map((variant) => ({
     size: String(variant.size || '').trim(),
     color: String(variant.color || '').trim(),
@@ -31,7 +32,6 @@ export function buildProductData(body, files = [], existingImages = []) {
     throw new AppError('Each variant needs a size and color', 400);
   }
 
-  const uploaded = files.map((file) => `/uploads/${file.filename}`);
   const kept = parseList(body.existingImages);
   const images = uploaded.length ? [...kept, ...uploaded] : existingImages.length ? existingImages : kept;
 
@@ -153,7 +153,8 @@ export const getProduct = asyncHandler(async (req, res) => {
 });
 
 export const createProduct = asyncHandler(async (req, res) => {
-  const data = buildProductData(req.body, req.files || []);
+  const uploaded = await persistUploads(req.files || []);
+  const data = buildProductData(req.body, uploaded);
   if (!data.images.length) {
     throw new AppError('Upload at least one product image', 400);
   }
@@ -168,7 +169,8 @@ export const createProduct = asyncHandler(async (req, res) => {
 export const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) throw new AppError('Product not found', 404);
-  const data = buildProductData(req.body, req.files || [], product.images);
+  const uploaded = await persistUploads(req.files || []);
+  const data = buildProductData(req.body, uploaded, product.images);
   const category = await Category.findById(data.category);
   if (!category) throw new AppError('Category not found', 400);
   if (slugify(data.name) !== product.slug) {
